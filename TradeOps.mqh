@@ -16,6 +16,8 @@
 #include <Trade/Trade.mqh>
 CTrade Trade; 
 #endif 
+
+
 class CTradeOps {
    private:
       string      TRADE_SYMBOL;
@@ -105,6 +107,7 @@ class CTradeOps {
       virtual     int      OP_ModifyTP(double tp);
       virtual     int      OP_OrdersCloseBatch(int &orders[]); 
       virtual     int      OP_OrdersBreakevenBatch(int &orders[]); 
+      virtual     int      OP_OrdersCloseBatchOrderType(ENUM_ORDER_TYPE order_type); 
       
       //--- MISC FUNCTIONS
       virtual     bool     OrderIsPending(int ticket); 
@@ -304,6 +307,27 @@ int      CTradeOps::OP_OrdersCloseBatch(int &orders[]) {
    
    delete order_pool; 
    return OP_OrdersCloseBatch(extracted); 
+}
+
+int      CTradeOps::OP_OrdersCloseBatchOrderType(ENUM_ORDER_TYPE order_type) {
+   if (PosTotal() == 0) return 0;
+   
+   CPoolGeneric<int> *tickets = new CPoolGeneric<int>(); 
+   
+   int s, ticket; 
+   for (int i = 0; i < PosTotal(); i++) {
+      s = OP_OrderSelectByIndex(i);
+      ticket = PosTicket();
+      if (!OP_TradeMatchTicket(ticket)) continue;
+      if (PosOrderType() != order_type) continue;
+      tickets.Append(ticket);
+   }
+   
+   int extracted[];
+   int num_extracted = tickets.Extract(extracted);
+   OP_OrdersCloseBatch(extracted); 
+   delete tickets;
+   return num_extracted; 
 }
 
 int      CTradeOps::OP_OrdersBreakevenBatch(int &orders[]) {
