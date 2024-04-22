@@ -100,7 +100,7 @@ class CTradeOps {
       virtual     int      OP_OrderOpen(string symbol, ENUM_ORDER_TYPE order_type, double volume, double price, double sl, double tp, string comment, datetime expiration = 0); 
       virtual     bool     OP_TradeMatch(int index);
       virtual     bool     OP_TradeMatchTicket(int ticket); 
-     
+      virtual     double   OP_CalcLot(const double entry_price, const double sl_price, const double risk_usd); 
       virtual     int      OP_ModifySL(int ticket, double sl); 
      
       
@@ -399,4 +399,10 @@ int      CTradeOps::OP_ModifySL(int ticket, double sl) {
    #endif 
    if (!m) Console_.LogError(StringFormat("Order Modify Error. Current SL: %f, Target SL: %f", PosSL(), sl), __FUNCTION__); 
    return m; 
+}
+
+double         CTradeOps::OP_CalcLot(const double entry_price, const double sl_price, const double risk_usd) {
+   double sl_distance   = MathAbs(entry_price - sl_price);
+   double lot_size      = (risk_usd * UTIL_TRADE_PTS()) / (sl_distance * UTIL_TICK_VAL());
+   return lot_size; 
 }
