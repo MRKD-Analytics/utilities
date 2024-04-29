@@ -104,7 +104,7 @@ class CTradeOps {
       virtual     int      OP_ModifySL(int ticket, double sl); 
      
       
-      virtual     int      OP_ModifyTP(double tp);
+      virtual     int      OP_ModifyTP(int ticket, double tp);
       virtual     int      OP_OrdersCloseBatch(int &orders[]); 
       virtual     int      OP_OrdersBreakevenBatch(int &orders[]); 
       virtual     int      OP_OrdersCloseBatchOrderType(ENUM_ORDER_TYPE order_type); 
@@ -400,6 +400,20 @@ int      CTradeOps::OP_ModifySL(int ticket, double sl) {
    if (!m) Console_.LogError(StringFormat("Order Modify Error. Current SL: %f, Target SL: %f", PosSL(), sl), __FUNCTION__); 
    return m; 
 }
+
+int      CTradeOps::OP_ModifyTP(int ticket, double tp) {
+   int b = OP_OrderSelectByTicket(ticket); 
+   #ifdef __MQL4__ 
+   int m = OrderModify(PosTicket(), PosOpenPrice(), PosSL(), tp, 0);
+   #endif 
+   
+   #ifdef __MQL5__ 
+   int m = Trade.PositionModify(ticket, PosSl(), tp); 
+   #endif 
+   if (!m) Console_.LogError(StringFormat("Order Modify Error. Current TP: %f, Target TP: %f", PosTP(), tp), __FUNCTION__); 
+   return m;
+}
+
 
 double         CTradeOps::OP_CalcLot(const double entry_price, const double sl_price, const double risk_usd) {
    double sl_distance   = MathAbs(entry_price - sl_price);

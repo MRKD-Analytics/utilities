@@ -36,9 +36,13 @@ public:
 CConsole::CConsole(bool logging, bool notify, bool alerts)
    : logging_allowed_(logging)
    , notification_allowed_ (notify)
-   , alert_allowed_ (alerts) {}
+   , alert_allowed_ (alerts) {
+    
+   }
 
-CConsole::~CConsole() {}
+CConsole::~CConsole() {
+
+}
 
 void        CConsole::Status() {
    PrintFormat("Logging Allowed: %s, Notification Allowed: %s, Alert Allowed: %s", 
