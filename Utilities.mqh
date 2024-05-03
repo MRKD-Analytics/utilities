@@ -125,6 +125,13 @@ int               UTIL_TIME_DAY_OF_WEEK(datetime date) {
    return tm.day_of_week; 
 }
 
+int               UTIL_TIME_YEAR(datetime date) {
+   //--- Returns Year 
+   MqlDateTime tm; 
+   TimeToStruct(date, tm);
+   return tm.year; 
+}
+
 datetime          UTIL_GET_DATE(datetime date) {
    //--- Returns date 
    return StringToTime(TimeToString(date, TIME_DATE)); 
@@ -193,6 +200,7 @@ string         UTIL_LOT_STRING(double value) {
 
 string            UTIL_NORM_PRICE(double value) {
    //--- Another method for converting price to string 
+   //--- FAULTY! 4/29/2024
    string format_string    = StringFormat("%%.df", UTIL_SYMBOL_DIGITS());
    return StringFormat(format_string, value);
    

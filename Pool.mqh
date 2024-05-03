@@ -188,6 +188,12 @@ class CPoolObject : public CPool<T> {
    public:
       CPoolObject() {};
       ~CPoolObject(){}; 
-      
+      /*
+      virtual     int         Create(T &elements[]); 
+      virtual     void        Append(T &element); 
+      virtual     bool        Search(T &element); 
+      virtual     int         Extract(T &data[]); 
+      virtual     string      ArrayAsString(); 
+      */
 };
 
