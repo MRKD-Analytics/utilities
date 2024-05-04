@@ -222,9 +222,20 @@ double            UTIL_TO_PRICE(double value) {
 //+------------------------------------------------------------------+ 
 bool              UTIL_IS_TESTING() {
    //--- Checks if using strategy tester
-   return MQLInfoInteger(MQL_TESTER); 
+   return (bool)MQLInfoInteger(MQL_TESTER); 
 }
 
+double            UTIL_SCREEN_DPI() {
+   return (double)TerminalInfoInteger(TERMINAL_SCREEN_DPI);
+}
+
+double            UTIL_DPI_SCALE_FACTOR() {
+   return (UTIL_SCREEN_DPI() / 96); 
+}
+
+int               UTIL_SCALE_DPI(double value) {
+   return (int)MathRound(value * UTIL_DPI_SCALE_FACTOR()); 
+}
 
 
 //+------------------------------------------------------------------+

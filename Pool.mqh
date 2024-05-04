@@ -165,7 +165,7 @@ int            CPoolGeneric::Remove(T element) {
 template <typename T>
 bool           CPoolGeneric::Sort(void) {
    if (Size() == 0) return false;
-   return ArraySort(data_); 
+   return (bool)ArraySort(data_); 
 }
 
 template <typename T> 
