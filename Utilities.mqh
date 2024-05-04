@@ -254,3 +254,14 @@ bool           UTIL_IS_NEW_CANDLE() {
    return new_candle; 
    
 }
+
+template <typename T>
+bool           UTIL_IS_POINTER_INVALID(T object_ptr) {
+   return (CheckPointer(object_ptr) == POINTER_INVALID); 
+}
+
+
+template <typename T>
+bool           UTIL_IS_POINTER_DYNAMIC(T object_ptr) {
+   return (CheckPointer(object_ptr) == POINTER_DYNAMIC); 
+}
