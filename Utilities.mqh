@@ -47,6 +47,20 @@ double            UTIL_PREVIOUS_DAY_LOW()      {
 }
 
 
+double            UTIL_HIGHEST_IN_DATE_RANGE(datetime start_time, datetime end_time) {
+   double price[]; 
+   int copied  = CopyHigh(Symbol(), PERIOD_CURRENT, start_time, end_time, price); 
+   return price[ArrayMaximum(price)]; 
+}
+
+double            UTIL_LOWEST_IN_DATE_RANGE(datetime start_time, datetime end_time) {
+   double price[]; 
+   int copied = CopyLow(Symbol(), PERIOD_CURRENT, start_time, end_time, price); 
+   return price[ArrayMinimum(price)]; 
+}
+
+
+
 //+------------------------------------------------------------------+
 //| Symbol Properties                                                |
 //+------------------------------------------------------------------+ 

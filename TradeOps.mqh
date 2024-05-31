@@ -113,6 +113,7 @@ class CTradeOps {
       virtual     bool     OrderIsPending(int ticket); 
       virtual     int      PopOrderArray(int &tickets[]); 
       virtual     bool     OrderTypeIsPending(ENUM_ORDER_TYPE order); 
+      virtual     bool     OrderIsClosed(int ticket); 
       
       
 
@@ -419,4 +420,9 @@ double         CTradeOps::OP_CalcLot(const double entry_price, const double sl_p
    double sl_distance   = MathAbs(entry_price - sl_price);
    double lot_size      = (risk_usd * UTIL_TRADE_PTS()) / (sl_distance * UTIL_TICK_VAL());
    return lot_size; 
+}
+
+bool           CTradeOps::OrderIsClosed(int ticket) {
+   int s = OP_OrderSelectByTicket(ticket);  
+   return PosCloseTime() != 0; 
 }
