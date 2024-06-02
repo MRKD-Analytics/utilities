@@ -128,16 +128,20 @@ CTradeOps::CTradeOps(string symbol, int magic)
    #endif 
 } 
 
-CTradeOps::~CTradeOps(void) {
+CTradeOps::~CTradeOps(void) { 
    delete Console_; 
 }
 
-bool       CTradeOps::OP_CloseTrade(int ticket) {
+
+//--- Closes a trade specified by the ticket. 
+bool       CTradeOps::OP_CloseTrade(int ticket) {  
+
    ResetLastError();
    int   t     = OP_OrderSelectByTicket(ticket);  
    double   close_price = 0;
    ENUM_ORDER_TYPE   order_type  = PosOrderType();
    
+   //--- Sets close price based on order type. 
    switch(order_type) {
       case ORDER_TYPE_BUY:    close_price = UTIL_PRICE_BID();  break;
       case ORDER_TYPE_SELL:   close_price = UTIL_PRICE_ASK();  break; 
@@ -145,7 +149,8 @@ bool       CTradeOps::OP_CloseTrade(int ticket) {
    }
    
    bool c;
-   switch(order_type) {
+   switch(order_type) { 
+      //--- Closes market orders 
       case ORDER_TYPE_BUY:
       case ORDER_TYPE_SELL:
          #ifdef __MQL4__ 
@@ -158,9 +163,12 @@ bool       CTradeOps::OP_CloseTrade(int ticket) {
          if (!c) Console_.LogError(StringFormat("Order Close Failed. Ticket: %i, Error: %i", 
             PosTicket(), 
             GetLastError()), __FUNCTION__); 
-         break; 
+         break;  
+      //--- Deletes limit orders
       case ORDER_TYPE_BUY_LIMIT:
       case ORDER_TYPE_SELL_LIMIT:
+      case ORDER_TYPE_BUY_STOP: 
+      case ORDER_TYPE_SELL_STOP: 
          #ifdef __MQL4__ 
          c  = OrderDelete(PosTicket()); 
          #endif 
@@ -179,7 +187,7 @@ bool       CTradeOps::OP_CloseTrade(int ticket) {
    return c;    
 }
 
-
+//--- Opens/Sends a trade/order. 
 int      CTradeOps::OP_OrderOpen(
    string symbol,
    ENUM_ORDER_TYPE order_type,
@@ -188,9 +196,8 @@ int      CTradeOps::OP_OrderOpen(
    double sl,
    double tp,
    string comment,
-   datetime expiration=0) {
+   datetime expiration=0) { 
       //--- Validate inputs 
-      
       #ifdef __MQL4__ 
       int ticket = OrderSend(Symbol(), order_type, NormalizeDouble(volume, 2), price, 3, sl, tp, comment, MAGIC(), expiration);
       #endif 
@@ -233,21 +240,15 @@ int      CTradeOps::OP_OrderOpen(
       return ticket; 
 }
 
-bool     CTradeOps::OrderTypeIsPending(ENUM_ORDER_TYPE order) {
-   switch(order) {
-      case ORDER_TYPE_BUY: 
-      case ORDER_TYPE_SELL: 
-         return false; 
-      default: 
-         break; 
-   }
-   return true; 
+
+// Checks if input order type is pending. 
+bool     CTradeOps::OrderTypeIsPending(ENUM_ORDER_TYPE order) { 
+   return ((order==ORDER_TYPE_BUY) || (order==ORDER_TYPE_SELL)); 
 }
 
+//--- Closes trades opened by the EA. Only closes symbol and magic number set in constructor. 
 int      CTradeOps::OP_OrdersCloseAll(void) {
-   /**
-      Closes trades opened by the EA. Closes only set symbol and magic number 
-   **/
+
    //--- Last Update 3/29/2024
    int open_positions   = PosTotal(); 
    CPoolGeneric<int> *tickets_to_close = new CPoolGeneric<int>(); 
@@ -261,12 +262,6 @@ int      CTradeOps::OP_OrdersCloseAll(void) {
       tickets_to_close.Append(ticket);
    }
    
-   /*
-   int closed     = 0;
-   for (int j = 0; j < tickets_to_close.Size(); j++) {
-      bool c   = OP_CloseTrade(tickets_to_close.Item(j)); 
-      if (c) closed++; 
-   }*/
    
    int closed = 0, active_ticket;
    bool d; 
@@ -282,6 +277,7 @@ int      CTradeOps::OP_OrdersCloseAll(void) {
    return closed;    
 }
 
+//--- Closes a batch of tickets specified by `orders` 
 int      CTradeOps::OP_OrdersCloseBatch(int &orders[]) {
    CPoolGeneric <int> *order_pool = new CPoolGeneric<int>(); 
    order_pool.Create(orders); 
@@ -310,6 +306,7 @@ int      CTradeOps::OP_OrdersCloseBatch(int &orders[]) {
    return OP_OrdersCloseBatch(extracted); 
 }
 
+//--- Closes a batch of trades specified by order type. 
 int      CTradeOps::OP_OrdersCloseBatchOrderType(ENUM_ORDER_TYPE order_type) {
    if (PosTotal() == 0) return 0;
    
@@ -331,6 +328,7 @@ int      CTradeOps::OP_OrdersCloseBatchOrderType(ENUM_ORDER_TYPE order_type) {
    return num_extracted; 
 }
 
+//--- Sets a batch of trades into breakeven. 
 int      CTradeOps::OP_OrdersBreakevenBatch(int &orders[]) {
    CPoolGeneric<int> *order_pool = new CPoolGeneric<int>(); 
    order_pool.Create(orders);
@@ -367,6 +365,10 @@ int      CTradeOps::PopOrderArray(int &tickets[]) {
    return ArraySize(tickets); 
 }
 
+/**
+ * Checks if the trade at the specified index in the order pool matches 
+ * symbol and magic number set in constructor. 
+**/
 bool     CTradeOps::OP_TradeMatch(int index) {
    
    int t = OP_OrderSelectByIndex(index); 
@@ -374,7 +376,10 @@ bool     CTradeOps::OP_TradeMatch(int index) {
    if (PosSymbol() != SYMBOL()) return false; 
    return true; 
 }
-
+/**
+ * Checks if the trade specified by the ticket matches
+ * symbol and magic number set in constructor. 
+**/
 bool     CTradeOps::OP_TradeMatchTicket(int ticket) {
    
    int t = OP_OrderSelectByTicket(ticket);
@@ -383,12 +388,14 @@ bool     CTradeOps::OP_TradeMatchTicket(int ticket) {
    return true;
 }
 
+//--- Checks if trade specified by the ticket is a pending order. 
 bool     CTradeOps::OrderIsPending(int ticket) {
    int t = OP_OrderSelectByTicket(ticket); 
    if (PosOrderType() > 1) return true; 
    return false;
 }
 
+//--- Modifies SL. This can be used for trailing stops or setting breakeven 
 int      CTradeOps::OP_ModifySL(int ticket, double sl) {
    int b = OP_OrderSelectByTicket(ticket); 
    #ifdef __MQL4__ 
@@ -402,6 +409,7 @@ int      CTradeOps::OP_ModifySL(int ticket, double sl) {
    return m; 
 }
 
+//--- Modifies TP. 
 int      CTradeOps::OP_ModifyTP(int ticket, double tp) {
    int b = OP_OrderSelectByTicket(ticket); 
    #ifdef __MQL4__ 
@@ -415,13 +423,14 @@ int      CTradeOps::OP_ModifyTP(int ticket, double tp) {
    return m;
 }
 
-
+//--- Calculates Lot size based on entry price, sl price, and risk amount in USD.
 double         CTradeOps::OP_CalcLot(const double entry_price, const double sl_price, const double risk_usd) {
    double sl_distance   = MathAbs(entry_price - sl_price);
    double lot_size      = (risk_usd * UTIL_TRADE_PTS()) / (sl_distance * UTIL_TICK_VAL());
    return lot_size; 
 }
 
+//--- Checks if order/trade specified by ticket is already closed. 
 bool           CTradeOps::OrderIsClosed(int ticket) {
    int s = OP_OrderSelectByTicket(ticket);  
    return PosCloseTime() != 0; 

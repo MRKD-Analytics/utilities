@@ -31,6 +31,7 @@ class CPool : public CArray {
                   int         Dequeue(); 
 };
 
+//--- Clears array contents 
 template <typename T> 
 void           CPool::Clear(void) {
    ArrayFree(data_);
@@ -38,6 +39,7 @@ void           CPool::Clear(void) {
    ZeroMemory(data_); 
 }
 
+//--- Appends specified element into array. 
 template <typename T> 
 void           CPool::Append(T &element) {
    int size = Size(); 
@@ -45,7 +47,7 @@ void           CPool::Append(T &element) {
    data_[size]    = element; 
 }
 
-
+//--- Removes the element at the specified index. 
 template <typename T>
 int            CPool::Pop(int index) {
    T dummy[]; 
@@ -64,6 +66,7 @@ int            CPool::Pop(int index) {
    return Size(); 
 }
 
+//--- Creates an array of elements and stored into the `data_` member variable. 
 template <typename T>
 int         CPool::Create(T &elements[]) {
    int size = ArraySize(elements); 
@@ -73,13 +76,14 @@ int         CPool::Create(T &elements[]) {
    
 }
 
+//--- Removes the first element in the array. 
 template <typename T> 
 int         CPool::Dequeue(void)    { return Pop(0); }
 
 
 
 
-
+//--- Class for creating Pools of generic types. 
 template <typename T> 
 class CPoolGeneric : public CPool<T> {
    private:
@@ -100,6 +104,7 @@ class CPoolGeneric : public CPool<T> {
       virtual     T        Last();
 };
 
+//--- Searches array for specific element 
 template <typename T> 
 bool        CPoolGeneric::Search(T &element) {
    int size = Size(); 
@@ -107,6 +112,7 @@ bool        CPoolGeneric::Search(T &element) {
    return false;
 }
 
+//--- Sets the array as a string 
 template <typename T> 
 string         CPoolGeneric::ArrayAsString(void) {
    
@@ -120,6 +126,7 @@ string         CPoolGeneric::ArrayAsString(void) {
    return array_string; 
 }
 
+//--- Creates an array of the specified elements. 
 template <typename T> 
 int            CPoolGeneric::Create(T &elements[]) {
    int size = ArraySize(elements); 
@@ -128,6 +135,7 @@ int            CPoolGeneric::Create(T &elements[]) {
    return Size();
 }
 
+//--- Copies the contents of the `data_` member variable into an array passed by reference, which can be accessed externally. 
 template <typename T> 
 int            CPoolGeneric::Extract(T &data[]) {
    int size = Size(); 
@@ -136,12 +144,14 @@ int            CPoolGeneric::Extract(T &data[]) {
    return ArraySize(data); 
 }
 
+//--- Adds an array into the array passed by reference. 
 template <typename T>
 int            CPoolGeneric::Add(T &data[]) {
    for (int i = 0; i < ArraySize(data); i++) Append(data[i]);
    return ArraySize(data); 
 }
 
+//--- Removes an element 
 template <typename T>
 int            CPoolGeneric::Remove(T element) {
    
@@ -162,18 +172,21 @@ int            CPoolGeneric::Remove(T element) {
    return Size(); 
 }
 
+//--- Sorts an array 
 template <typename T>
 bool           CPoolGeneric::Sort(void) {
    if (Size() == 0) return false;
    return (bool)ArraySort(data_); 
 }
 
+//--- Returns the first item in the array.
 template <typename T> 
 T              CPoolGeneric::First(void) {
    Sort();
    return Item(0); 
 }
 
+//--- Returns the last item in the array. 
 template <typename T>
 T              CPoolGeneric::Last(void) {
    Sort();
@@ -182,7 +195,7 @@ T              CPoolGeneric::Last(void) {
    return Item(last); 
 }
 
-// ===== POOL OBJECT 
+// ===== POOL OBJECT  
 template <typename T> 
 class CPoolObject : public CPool<T> {
    public:
